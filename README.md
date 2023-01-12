@@ -13,6 +13,16 @@ About Microsoft Graph:  "Microsoft Graph is the gateway to data and intelligence
 <h1>Testing with POSTMAN</h1>
   <p>After we have received all the necessary parameters for making the call (client id, tenant id and secret value), before we start working on the procedures and functions, it would be good to try to get the results in the form of JSON format in POSTMAN. It's an free API platform for developers to design, build, test and iterate their APIs. 
 After you download it to your computer and log in, you can try fetching an authentication token and fetching a message from an email in JSON format in it, you will have only two methods. The method for retrieving the authentication token will be POST, while the method for retrieving messages will be PUT. Likewise, it is necessary to set all the parameters that I will explain in further steps. </p>
+  <p>  Retrieving authentication token:  </p>
+  <ol type="1">
+      <li> HTTP request method: POST </li>
+      <li> URL: https://login.microsoftonline.com/{your_tenant_id}/oauth2/v2.0/token </li>
+      <li> Headers: KEY: 'Content-Type'  VALUE: 'application/x-www-form-urlencoded'</li>
+      <li> Body: KEY: 'grant_type', 'client_id', client_secret', 'scope'  VALUE: 'client_credentials', 'your_client_id', 'your_client_secret', 'https://graph.microsoft.com/.default' </li>
+    <li> Press SEND </li>
+   </ol>
+  <p> 
+As a result, you should get token_type: Bearer and under access_token you should get a code that we will use later in retrieving messages.</p>
 </body>
 </html>
 
