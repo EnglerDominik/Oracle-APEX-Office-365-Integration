@@ -3,7 +3,7 @@
 <head>
 </head>
 <body>
-
+<h1>In progress...</h1>
 <h1>Integration of Oracle APEX and Office 365</h1>
 <p>The package contains the functions and procedures needed to load messages from Microsoft Outlook into the Oracle APEX application using Microsoft Graph.
 First of all, it is necessary to register the application on Azure in order to receive the corresponding codes that will later be used in the package (https://azure.microsoft.com/en-us). After we get the application (client) ID, directory (tenant) ID and client secret value, we are ready for further steps.
