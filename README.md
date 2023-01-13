@@ -22,7 +22,24 @@ After you download it to your computer and log in, you can try fetching an authe
     <li> Press SEND </li>
    </ol>
   <p> 
-As a result, you should get token_type: Bearer and under access_token you should get a code that we will use later in retrieving messages.</p>
+As a result, you should get token_type: Bearer and under access_token you should get a code that we will use later in retrieving messages. 
+The next tab that we will add in POSTMAN will be for retrieving messages from Microsoft Outlook, steps on how to send a request:
+  </p>
+  <ol type="1">
+      <li> HTTP request method: GET </li>
+      <li> URL: https://graph.microsoft.com/v1.0/users/{your_mail}/mailFolders/Inbox/messages?$select=id,receivedDateTime,hasAttachments,subject,bodyPreview,sender,from,importance 
+    (
+The $select parameter determines which message data we will see in the query result, 
+we can add parameters under the params menu, 
+example: KEY - $select VALUE - id,receivedDateTime,hasAttachments,subject,bodyPreview,sender,from,importance)</li>
+      <li> 
+Under the authorization menu, our authorization type is Bearer token, and under the value we put the token we received</li>
+      <li> 
+Under the headers menu, we must add the following parameters: KEY - Content-Type VALUE - application/json
+KEY - Prefer VALUE - outlook.body-content-type=text, KEY - Authorization VALUE - Bearer your_token </li>
+    <li> Press SEND </li>
+   </ol>
+ <p> As a result, we received messages in JSON format. It is desirable to understand the way the request is sent in POSTMAN because we configure apex_web_service.make_rest_request in a similar way. </p>
 </body>
 </html>
 
