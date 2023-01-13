@@ -1,0 +1,37 @@
+CREATE OR REPLACE PACKAGE mail_api
+AS
+    FUNCTION f_get_value_object_id (p_key VARCHAR2)
+        RETURN VARCHAR2;
+
+    FUNCTION f_get_value_tenant_id (p_key VARCHAR2)
+        RETURN VARCHAR2;
+
+    FUNCTION f_get_value_secret_value (p_key VARCHAR2)
+        RETURN VARCHAR2;
+
+    FUNCTION f_get_value_secret_id (p_key VARCHAR2)
+        RETURN VARCHAR2;
+
+    FUNCTION f_get_value_client_id (p_key VARCHAR2)
+        RETURN VARCHAR2;
+
+    FUNCTION f_get_value_wallet_path (p_key VARCHAR2)
+        RETURN VARCHAR2;
+
+    FUNCTION f_get_value_wallet_pass (p_key VARCHAR2)
+        RETURN VARCHAR2;
+
+    PROCEDURE p_new_value (p_value         CONFIG_DATA.VALUE%TYPE,
+                           p_code          CONFIG_DATA.CODE%TYPE,
+                           p_message   OUT VARCHAR2);
+
+    PROCEDURE get_messages (p_result OUT CLOB);
+
+    FUNCTION get_token (
+        p_client_id       IN VARCHAR2 := 'your_client_id',
+        p_client_secret   IN VARCHAR2 := 'your_client_secret',
+        p_tenant_id       IN VARCHAR2 := 'your_tenant_id')
+        RETURN VARCHAR2;
+
+    PROCEDURE json_insert;
+END mail_api; 
