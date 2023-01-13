@@ -177,7 +177,7 @@ AS
     -- DECLARE
     -- l_result CLOB;
     --BEGIN
-    -- uzk_mail_api.get_messages (p_result => l_result);
+    -- mail_api.get_messages (p_result => l_result);
     -- -- Do something with the result
     -- dbms_output.put_line(l_result);
     -- END;
@@ -223,11 +223,11 @@ AS
         RETURN l_access_token;
     END get_token;
 
-    --select uzk_mail_api.get_token from dual;
+    --select mail_api.get_token from dual;
     PROCEDURE json_insert
     AS
     BEGIN
-        INSERT INTO uzk_mail_messages (RECEIVEDDATETIME,
+        INSERT INTO mail_messages (RECEIVEDDATETIME,
                                        HASATTACHMENTS,
                                        subject,
                                        BODYPREVIEW,
