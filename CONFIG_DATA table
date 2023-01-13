@@ -1,0 +1,14 @@
+CREATE TABLE CONFIG_DATA
+(
+    CODE           VARCHAR2 (4000 BYTE),
+    DESCRIPTION    VARCHAR2 (4000 BYTE),
+    VALUE          VARCHAR2 (4000 BYTE),
+    CONFIG_KEY     VARCHAR2 (200 BYTE),
+    UPDATED_BY     VARCHAR2 (4000 BYTE),
+    CREATED_BY     VARCHAR2 (4000 BYTE),
+    CREATED        DATE,
+    UPDATED        DATE
+)
+
+
+The table contains the values of client_id, secret_value, tenant_id, wallet_path, wallet_password and other parameters necessary to use the package.
