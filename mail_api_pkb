@@ -1,0 +1,272 @@
+CREATE OR REPLACE PACKAGE BODY mail_api
+AS
+    FUNCTION f_get_value_object_id (p_key VARCHAR2)
+        RETURN VARCHAR2
+    AS
+        v_object   VARCHAR2 (50);
+    BEGIN
+        SELECT object_id
+          INTO v_object
+          FROM config_data
+         WHERE config_key = p_key;
+
+        RETURN v_object;
+    END;
+
+    FUNCTION f_get_value_tenant_id (p_key VARCHAR2)
+        RETURN VARCHAR2
+    AS
+        v_tenant   VARCHAR2 (50);
+    BEGIN
+        SELECT tenant_id
+          INTO v_tenant
+          FROM config_data
+         WHERE config_key = p_key;
+
+        RETURN v_tenant;
+    END;
+
+    FUNCTION f_get_value_secret_value (p_key VARCHAR2)
+        RETURN VARCHAR2
+    AS
+        v_secret_value   VARCHAR2 (50);
+    BEGIN
+        SELECT CLIENT_SECRET_VALUE
+          INTO v_secret_value
+          FROM config_data
+         WHERE config_key = p_key;
+
+        RETURN v_secret_value;
+    END;
+
+    FUNCTION f_get_value_secret_id (p_key VARCHAR2)
+        RETURN VARCHAR2
+    AS
+        v_secret_id   VARCHAR2 (50);
+    BEGIN
+        SELECT CLIENT_SECRET_ID
+          INTO v_secret_id
+          FROM config_data
+         WHERE config_key = p_key;
+
+        RETURN v_secret_id;
+    END;
+
+    FUNCTION f_get_value_client_id (p_key VARCHAR2)
+        RETURN VARCHAR2
+    AS
+        v_client_id   VARCHAR2 (50);
+    BEGIN
+        SELECT CLIENT_ID
+          INTO v_client_id
+          FROM config_data
+         WHERE config_key = p_key;
+
+        RETURN v_client_id;
+    END;
+
+    FUNCTION f_get_value_wallet_path (p_key VARCHAR2)
+        RETURN VARCHAR2
+    AS
+        v_wallet_path   VARCHAR2 (50);
+    BEGIN
+        SELECT wallet_path
+          INTO v_wallet_path
+          FROM config_data
+         WHERE config_key = p_key;
+
+        RETURN v_wallet_path;
+    END;
+
+    FUNCTION f_get_value_wallet_pass (p_key VARCHAR2)
+        RETURN VARCHAR2
+    AS
+        v_wallet_pass   VARCHAR2 (50);
+    BEGIN
+        SELECT wallet_password
+          INTO v_wallet_pass
+          FROM config_data
+         WHERE config_key = p_key;
+
+        RETURN v_wallet_pass;
+    END;
+
+    PROCEDURE p_new_value (p_value        CONFIG_DATA.VALUE%TYPE,
+                           p_code         CONFIG_DATA.CODE%TYPE,
+                           p_message   OUT VARCHAR2)
+    IS
+        v_old_value   CONFIG_DATA.VALUE%TYPE;
+    --v_o_event_log      event_log_obj := event_log_obj ();
+    BEGIN
+        --v_o_event_log.p_add_master (
+        --    p_level     => 'L',
+        --    p_label   => 'mail_api.p_new_value',
+        --    p_message   =>
+        --        'Values of input parameters in the p_new_value procedure');
+        --
+        --v_o_event_log.p_add_detail ('p_value', p_value);
+        --v_o_event_log.p_add_detail ('p_value', p_value);
+        --v_o_event_log.p_enter;
+
+
+        SELECT VALUE
+          INTO v_old_value
+          FROM CONFIG_DATA
+         WHERE p_code = CODE;
+
+        IF p_value != v_old_value
+        THEN
+            UPDATE CONFIG_DATA
+               SET VALUE = p_value
+             WHERE p_code = CODE;
+        END IF;
+
+        COMMIT;
+    EXCEPTION
+        WHEN OTHERS
+        THEN
+            p_message :=
+                   'An error occurred while changing the value.. '
+                || DBMS_UTILITY.format_error_backtrace;
+    END p_new_value;
+
+    --Procedure for changing the APEX_ITEM in the application
+
+
+    PROCEDURE get_messages (p_result OUT CLOB)
+    AS
+        access_token    VARCHAR2 (4000);
+        http_request    CLOB;
+        http_response   CLOB;
+        --v_o_event_log   event_log_obj := event_log_obj ();
+        l_token         VARCHAR2 (4000);
+    BEGIN
+        --v_o_event_log.p_add_master (
+        --    p_level     => 'L',
+        --    p_label  => 'get_messages',
+        --    p_message   =>
+        --        'Values of input parameters to the get_messages procedure');
+
+        l_token := uzk_mail_api.get_token;
+
+       -- v_o_event_log.p_add_detail ('l_token', l_token);
+
+        apex_web_service.set_request_headers (
+            p_name_01    => 'Content-Type',
+            p_value_01   => 'application/json',
+            p_name_02    => 'Authorization',
+            p_value_02   => 'Bearer ' || l_token);
+
+        http_request :=
+            apex_web_service.make_rest_request (
+                p_url           =>
+                    'https://graph.microsoft.com/v1.0/users/#your_mail#/mailFolders/Inbox/messages?$select=id,receivedDateTime,hasAttachments,subject,bodyPreview,sender,from,importance',
+                p_http_method   => 'GET',
+                p_wallet_path   => '#your_wallet_path#',
+                p_wallet_pwd    => '#your_wallet_password#');
+
+        -- v_o_event_log.add_detail ('http_request', http_request);
+        --v_o_event_log.p_enter;
+
+
+        p_result := http_request;
+
+        INSERT INTO X_TMP (RECIPIENTS_CONTENT)
+             VALUES (p_result);
+    --to start the procedure:
+    -- DECLARE
+    -- l_result CLOB;
+    --BEGIN
+    -- uzk_mail_api.get_messages (p_result => l_result);
+    -- -- Do something with the result
+    -- dbms_output.put_line(l_result);
+    -- END;
+
+    END get_messages;
+
+    FUNCTION get_token (
+        p_client_id       IN VARCHAR2 := '#your_client_id#',
+        p_client_secret   IN VARCHAR2 := '#your_client_secret#',
+        p_tenant_id       IN VARCHAR2 := '#your_tenant_id#')
+        RETURN VARCHAR2
+    AS
+        l_response_text   VARCHAR2 (4000);
+        l_access_token    CLOB;
+        l_body            VARCHAR2 (4000);
+        j                 apex_json.t_values;
+    BEGIN
+        apex_web_service.set_request_headers (
+            p_name_01    => 'Content-Type',
+            p_value_01   => 'application/x-www-form-urlencoded');
+
+        l_body :=
+               'grant_type=client_credentials&client_id='
+            || p_client_id
+            || '&client_secret='
+            || p_client_secret
+            || '&scope=https://graph.microsoft.com/.default';
+        l_response_text :=
+            apex_web_service.make_rest_request (
+                p_url           =>
+                       'https://login.microsoftonline.com/'
+                    || p_tenant_id
+                    || '/oauth2/v2.0/token',
+                p_http_method   => 'POST',
+                p_body          => l_body,
+                p_wallet_pwd    => '#your_wallet_password#');
+
+        -- token parsing
+        apex_json.parse (j, l_response_text);
+        l_access_token :=
+            apex_json.get_varchar2 (p_path => 'access_token', p_values => j);
+
+        RETURN l_access_token;
+    END get_token;
+
+    --select uzk_mail_api.get_token from dual;
+    PROCEDURE json_insert
+    AS
+    BEGIN
+        INSERT INTO uzk_mail_messages (RECEIVEDDATETIME,
+                                       HASATTACHMENTS,
+                                       subject,
+                                       BODYPREVIEW,
+                                       importance,
+                                       NAME,
+                                       ADDRESS)
+            SELECT TO_TIMESTAMP_TZ (podaci.receivedDateTime,
+                                    'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+                   data.hasAttachments,
+                   data.subject,
+                   data.bodyPreview,
+                   data.importance,
+                   data.name,
+                   data.address
+              FROM x_tmp,
+                   JSON_TABLE (
+                       RECIPIENTS_CONTENT,
+                       '$.value[*]'
+                       COLUMNS (
+                           receivedDateTime
+                               VARCHAR2 (300)
+                               PATH '$.receivedDateTime',
+                           hasAttachments
+                               VARCHAR2 (50)
+                               PATH '$.hasAttachments',
+                           subject VARCHAR2 (200) PATH '$.subject',
+                           bodyPreview VARCHAR2 (2000) PATH '$.bodyPreview',
+                           importance VARCHAR2 (200) PATH '$.importance',
+                           NESTED PATH '$.sender'
+                               COLUMNS (
+                                   name
+                                       VARCHAR2 (200)
+                                       PATH '$.emailAddress.name',
+                                   address
+                                       VARCHAR2 (200)
+                                       PATH '$.emailAddress.address')))
+                   AS data
+             WHERE id = your_data_id;
+
+        COMMIT;
+    END json_insert;
+END mail_api;
