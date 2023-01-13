@@ -1,0 +1,21 @@
+CREATE TABLE X_TMP
+(
+  ID                  NUMBER                    NOT NULL,
+  PROCESS_ID          NUMBER                    NOT NULL,
+  FROM_EMAIL          VARCHAR2(255 BYTE),
+  FROM_NAME           VARCHAR2(255 BYTE),
+  RECIPIENTS_CONTENT  CLOB,
+  SUBJECT             VARCHAR2(4000 BYTE),
+  TEXT_PART           CLOB,
+  HTML_PART           CLOB,
+  STATUS_ID           NUMBER,
+  BLOB_BASE64         CLOB,
+  MIME_TYPE           VARCHAR2(255 BYTE),
+  FILE_NAME           VARCHAR2(255 BYTE),
+  CREATED             DATE,
+  CREATED_BY          VARCHAR2(255 BYTE),
+  UPDATED             DATE,
+  UPDATED_BY          VARCHAR2(255 BYTE)
+)
+
+The table that serves us to save the JSON format of messages, after parsing the JSON, we save the data in the mail_messages table
