@@ -1,0 +1,6 @@
+After using DBMS_SCHEDULER to create a job that starts procedures for retrieving mails, it is necessary to make sure that only the latest messages are displayed.
+Several changes have been made to the package, specifically to the get_messages procedure.
+SELECT TO_CHAR (nvl(MAX (RECEIVEDDATETIME),trunc(sysdate,'YYYY')), 'YYYY-MM-DD"T"HH24:MI:SS"Z"') into l_latest_messages FROM mail_messages;
+
+
+
