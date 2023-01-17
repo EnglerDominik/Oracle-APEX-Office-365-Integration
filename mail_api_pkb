@@ -147,7 +147,7 @@ AS
         --    p_message   =>
         --        'Values of input parameters to the get_messages procedure');
 
-        l_token := uzk_mail_api.get_token;
+        l_token := mail_api.get_token;
 
        -- v_o_event_log.p_add_detail ('l_token', l_token);
 
